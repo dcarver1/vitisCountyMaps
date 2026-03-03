@@ -1,0 +1,276 @@
+---
+title: County Assessment Maps
+output:
+  html_document:
+      css: style.css
+date: "Report generated on `r Sys.Date()`"
+params:
+  data: NA
+---
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+# Load only the packages required for visualization and presentation
+pacman::p_load("leaflet", "dplyr", "DT", "sf", "htmltools")
+
+# Unpack the pre-processed data bundle
+meta   <- params$data$meta
+layers <- params$data$map_layers
+tables <- params$data$tables
+```
+
+<img src="logobanner.png" alt="Supporting Organizations" style="width: 100%">
+<br>
+
+<h1 style="text-align: center;"> `r meta$speciesName` </h1>
+
+<strong style="text-align: center;">This project is a collaboration among the [United States Botanic Garden](https://www.usbg.gov/), [San Diego Botanic Garden](https://sdbg.org/), [USDA ARS](https://www.ars.usda.gov/),  [Geospatial Centroid](https://gis.colostate.edu/) at Colorado State Univeristy, and [NatureServe](https://www.natureserve.org/). We are all grateful for your time and consideration in this evaluation effort. </strong>
+
+<a href="https://geospatialcentroid.github.io/vitis/home" target="_blank">Vitis Home Page</a>
+<br>
+<a href="https://geospatialcentroid.github.io/vitis/countyReports" target="_blank">All Vitis County Maps</a>
+<br>
+
+*If you are evaluating these maps, please be sure to complete the initial <a href="https://docs.google.com/forms/d/e/1FAIpQLSeyoQC-Ta2-KP-rGiGVqcZ3jq5AnpN6FdFptGcoCuOAteKYuw/viewform?usp=sf_link" target="_blank">registration form</a>.*
+<br>
+<a href="https://docs.google.com/spreadsheets/d/1fROduCBuYkKUv9bd1_N9SJ8ijyaA0C5BqG9nKZHFigI/edit?usp=sharing" target="_blank">Listing of all occurrence records for all species</a>
+<br> 
+<a href="https://docs.google.com/spreadsheets/d/1m6toqYmv49nz9A029p4DrkuQL7sis04wHZH1RzgsXdg/edit?usp=sharing" target="_blank">Listing of all USDA Plants and Bonap records</a>
+
+## Supporting information on method and taxonomy {.tabset}
+
+### Taxonomic concept
+
+<br>
+**Taxon** : `r meta$speciesName`
+<br>
+**Accepted Synonym(s)** : `r meta$synonyms$acceptedSynonym`
+<br> 
+**Excluded from concept** : `r meta$synonyms$Names_to_exclude_from_this_Species_Complex`
+<br>
+**NatureServe Concept Reference**: `r meta$synonyms$NatureServe_Concept_reference`
+<br>
+**Relationship to Flora of North America**: `r meta$synonyms$Relationship_to_FNA`
+<br>
+**Taxonomic Notes**: `r meta$synonyms$Taxonomic_notes`
+<br> 
+**NatureServe Classification Status**: `r meta$synonyms$Classification_Status_NatureServe`
+<br>
+**NatureServe Distribution**: `r meta$nsRef$Distribution`
+<br>
+**NatureServe Explorer**: `r meta$nsRef$link`
+<br>
+**This species is included in FNA : `r meta$fnaIncluded`**
+<br> 
+
+### Details on the map elements 
+
+#### County Level Features 
+
+All county level features report information that as aggregated to the county level. This include text reference to the county (state/county) and spatial point reference that occur within the county. 
+
+- <strong> Counties with a record: </strong> This presence absence map shows a county as green if it has at least one record from any of the evaluated sources.
+- <strong> Sum of records within County: </strong> This layer depicts the total number of unique records of a species across all sources within a county.
+- <strong> Counties listed in USDA Plants and/or Bonap Only (No occurrence points) </strong> These counties only contain a reference from USDA Plants and/or BONAP. There are no identified iNaturalist, herbarium, or germplasm occurrences from these locations.
+- <strong> Counties with one or more Herbarium or Germplasm Occurrence: </strong> These counties have at least one herbarium and/or germplasm occurrence. There may also be additional records within this county(iNaturalist, USDA Plants, BONAP, NatureServe).
+- <strong> Counties with iNaturalist Observation only:  </strong> These counties only have species observations from iNaturalist.
+
+#### Occurrence Features
+
+-  <strong>Germplasm Occurrences: </strong> Occurrence data with living specimens stored in a Genebank or Botanical Garden.
+-  <strong>Herbarium Occurrences with web url: </strong> Occurrence data of herbarium specimens, which includes an url for the source herbarium data.  
+-  <strong>Herbarium Occurrences without web url:</strong> Occurrence data of herbarium specimens.
+-  <strong>iNaturalist observation data:</strong> Research grade observations from iNaturalist. 
+
+### General Methods 
+
+#### Gathering Data
+
+Data was gathered at the Genus level from the following 
+
+**public repositories**
+- [Seinet](https://swbiodiversity.org/seinet/) 
+- [Genesys](https://www.genesys-pgr.org/)
+- [Wiews](https://www.fao.org/wiews/en/)
+- [GRIN](https://www.ars-grin.gov/) 
+- [USDA Plants](https://plants.usda.gov/home) 
+- [Crop Wild Relative 2020 publication](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/BV4I06) 
+
+**Sourced through communication with data owners** - [2023 Botanical Garden Survey](https://docs.google.com/spreadsheets/d/1fROduCBuYkKUv9bd1_N9SJ8ijyaA0C5BqG9nKZHFigI/edit?usp=sharing) -- available in the full source data 
+- [BONAP](http://www.bonap.org/)
+- [IUCN](https://www.iucnredlist.org/)
+
+#### Data Standardization and Taxonomy 
+**data standardization** : All data sets were altered to matched a standard data structure. The specific translation of data sets can be seen [here](https://github.com/dcarver1/cwr_wildgrapes/tree/main/preprocessing). 
+
+**Taxonomy**: The full synonyms cross walk can be viewed [here](https://docs.google.com/spreadsheets/d/1ZzKUr2GI8wZe42G-nnMZ3iyhUnnqn3OUCMK_0sFKniQ/edit?usp=drive_link). 
+
+#### Assigning the State and County to each occurrence 
+When latitude and longitude data was used to assign the state/country when possible. If no latitude and longitude data was provided, the state and county names were pulled from the attribute data associated with the record. If a state or county name could not be assigned by either method the record was excluded from this analysis. 
+
+#### Flora of North America 
+If state level distribution information was provided for a given specific species, that information was used to filter the states in which counties are evaluated. 
+
+## Map of County and Occurrence Records
+
+```{r produceMAP, echo=FALSE, message=FALSE, warning=FALSE}
+
+if(nrow(layers$points) == 0){
+  print("There is no spatial data for this species and no map can be produced.")
+} else {
+
+  # Base Map Setup
+  rr <- tags$div(HTML(paste0("<h3>", meta$speciesName , "</h3>")))  
+
+  m1 <- leaflet(width = "100%", height = 800, options = leafletOptions(minZoom = 3)) |>
+    addTiles(urlTemplate = '[https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/](https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/){z}/{y}/{x}', 
+             attribution = 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ') |>
+    addMapPane("anyRecord", zIndex = 414) |>
+    addMapPane("sumOfRecords", zIndex = 415) |>
+    addMapPane("bpData", zIndex = 418) |>
+    addMapPane("hgData", zIndex = 419) |>
+    addMapPane("points", zIndex = 420) |>
+    addControl(rr, position = "bottomleft")
+
+  # Add Spatial Features
+  m2 <- m1 |>
+    addPolygons(data = layers$countyClass,
+                color = "white", fillColor = ~singleColor, popup = ~popup,
+                weight = 0.8, fillOpacity = 0.6, opacity = 0.8,
+                group = "Counties with a record", options = pathOptions(pane = "anyRecord")) |>
+    addPolygons(data = layers$countyClass,
+                color = "white", fillColor = ~allColor, popup = ~popup,
+                weight = 0.8, fillOpacity = 1, opacity = 0.8,
+                group = "Sum of records within County", options = pathOptions(pane = "sumOfRecords")) |>
+    addPolygons(data = layers$bpData,
+                color = "white", fillColor = "#fec44f", popup = ~popup,
+                weight = 0.8, fillOpacity = 1, opacity = 0.8,
+                group = "Counties listed in USDA Plants and/or Bonap Only (No occurrence points)", options = pathOptions(pane = "bpData")) |>
+    addPolygons(data = layers$hgData,
+                color = "white", fillColor = "#fa9fb5", popup = ~popup,
+                weight = 0.8, fillOpacity = 1, opacity = 0.8,
+                group = "Counties with one or more Herbarium or Germplasm Occurrence", options = pathOptions(pane = "hgData")) |>
+    addPolygons(data = layers$oData,
+                color = "white", fillColor = "#f03b20", popup = ~popup,
+                weight = 0.8, fillOpacity = 1, opacity = 0.8,
+                group = "Counties with iNaturalist Observation only", options = pathOptions(pane = "hgData")) |>
+    addCircleMarkers(data = layers$points |> filter(type == "O"),
+                     color = ~color, opacity = 1, radius = 2, stroke = 1, popup = ~popup,
+                     group = "iNaturalist observation data", options = pathOptions(pane = "points")) |>
+    addCircleMarkers(data = layers$points |> filter(type == "H" & is.na(url)),
+                     color = "#fa9fb5", opacity = 1, radius = 2, stroke = 1, popup = ~popup,
+                     group = "Herbarium Occurrences without web url", options = pathOptions(pane = "points")) |>
+    addCircleMarkers(data = layers$points |> filter(type == "H" & !is.na(url)),
+                     color = "#c51b8a", opacity = 1, radius = 2, stroke = 1, popup = ~popup,
+                     group = "Herbarium Occurrences with web url", options = pathOptions(pane = "points")) |>
+    addCircleMarkers(data = layers$points |> filter(type == "G"),
+                     color = ~color, opacity = 1, radius = 2, stroke = 1, popup = ~popup,
+                     group = "Germplasm Occurrences", options = pathOptions(pane = "points"))
+
+  # Add Legends and Layer Controls
+  brbgAll <- c("#a6611a", "#dfc27d", '#c7eae5', '#80cdc1', '#35978f', '#01665e')
+  allVals <- c("1", "2-3", "3-5", "5-8", "8-11", ">12")
+
+  m3 <- m2 |>
+    addLegend(color = "#a8ddb5", group = "Counties with a record", labels = "Counties with a record") |>
+    addLegend(color = brbgAll, labels = allVals, group = "Sum of records within County", title = "Sum of records within County") |>
+    addLegend(color = "#fec44f", group = "Counties listed in USDA Plants and/or Bonap Only (No occurrence points)", labels = "Counties listed in USDA Plants and/or Bonap Only (No occurrence points)") |>
+    addLegend(color = "#fa9fb5", group = "Counties with one or more Herbarium or Germplasm Occurrence", label = "Counties with one or more Herbarium or Germplasm Occurrence") |>
+    addLegend(color = "#f03b20", group = "Counties with iNaturalist Observation only", labels = "Counties with iNaturalist Observation only") |>
+    addLegend(color = "#66c2a5", group = "Germplasm Occurrences", labels = "Germplasm Occurrences") |>
+    addLegend(color = "#c51b8a", group = "Herbarium Occurrences with web url", labels = "Herbarium Occurrences with web url") |>
+    addLegend(color = "#fa9fb5", group = "Herbarium Occurrences without web url", labels = "Herbarium Occurrences without web url") |>
+    addLegend(color = "#fc8d62", group = "iNaturalist observation data", labels = "iNaturalist observation data") |>
+    addLayersControl(
+      overlayGroups = c("Counties with a record", "Sum of records within County", 
+                        "Counties listed in USDA Plants and/or Bonap Only (No occurrence points)",
+                        "Counties with one or more Herbarium or Germplasm Occurrence",
+                        "Counties with iNaturalist Observation only", "counties changed during review",
+                        "Germplasm Occurrences", "Herbarium Occurrences with web url",
+                        "Herbarium Occurrences without web url", "iNaturalist observation data",
+                        "Locations changed during review"),
+      options = layersControlOptions(collapsed = FALSE)
+    ) |>
+    hideGroup(c("Sum of records within County", "Counties listed in USDA Plants and/or Bonap Only (No occurrence points)",
+                "Counties with one or more Herbarium or Germplasm Occurrence", "Counties with iNaturalist Observation only", 
+                "Herbarium Occurrences with web url", "Herbarium Occurrences without web url",
+                "iNaturalist observation data", "Germplasm Occurrences"))
+
+  # Add Reviewed Data if it exists
+  if(nrow(layers$rCounty) > 0){
+    m3 <- m3 |>
+      addPolygons(data = layers$rCounty, color = "black", fillColor = "#ebfc03", popup = ~popup,
+                  weight = 0.8, fillOpacity = 1, opacity = 0.8,
+                  group = "counties changed during review", options = pathOptions(pane = "hgData"))
+  }
+
+  if(nrow(layers$rPoints) > 0){
+    m3 <- m3 |>
+      addCircleMarkers(data = layers$rPoints, color = "#ebfc03", opacity = 1, radius = 2, stroke = 1, popup = ~popup,
+                       group = "Locations changed during review", options = pathOptions(pane = "points"))
+  }
+  
+  m3
+}
+```
+
+## Summary of Occurrence Data 
+This table includes all records used to generate the map.
+
+```{r occurrenceDataSummary, echo=FALSE, message=FALSE, warning=FALSE}
+occFiltered <- tables$occFiltered |>
+  dplyr::select(
+    Taxon = taxon, State = state, County = county,
+    `Data Source` = databaseSource, Type = type,
+    `Collector's Name` = observerName,
+    `Locality Description` = localityInformation,
+    Year = yearRecorded, `Source ID` = sourceUniqueID
+  )
+
+DT::datatable(occFiltered, rownames = FALSE, width = "100%", filter = "top")
+```
+
+## Data summarized to each County 
+
+The table below displays additional attribute data for all the counties with known occurrences. Columns can be filtered and sorted. The following states are included in this FNA state designation: `r if(meta$fnaIncluded){meta$allStateNames} else {"Not applicable"}`
+
+```{r countyDataTable, echo=FALSE, message=FALSE, warning=FALSE}
+df <- tables$countySummary |>
+  dplyr::select(-allColor, -fips2, -popup, -singleColor) |>
+  dplyr::arrange(REGION) |>
+  dplyr::rename(
+    `County Name` = NAME, GEOID = FIPS, `State Abbreviation` = REGION,
+    `iNaturalist Observation` = O, `Herbarium Occurrence` = H,
+    `Germplasm Occurrence` = G, `Pre 1970 Records` = pre1970,
+    `All Records Score` = anyRecord
+  ) 
+
+DT::datatable(df, rownames = FALSE, filter = "top")
+```
+
+## Data excluded by Flora of North America state filter
+
+The above map and table includes all occurrence data that falls within the established state range defined by Flora of North America.
+
+If the state range for a species was defined by Flora of North America all the occurrence records will be shown on the map and above table. 
+
+The table below shows the occurrence data that falls outside the established Flora of North America states.
+
+**The following States are included in the FNA description**: `r if(meta$fnaIncluded){meta$fnaStates} else {"Not included in FNA"}`
+
+```{r fna_exclusion, echo=FALSE, message=FALSE, warning=FALSE}
+if(!meta$fnaIncluded){
+  print("The state range for this species is not present in the Flora of North America")
+} else {
+  fnaFiltered <- tables$fnaFiltered |>
+    dplyr::mutate(
+      link = paste0("[https://docs.google.com/forms/d/e/1FAIpQLScCTcg6ITFMXs9QpQEAvN92GI06wtSTiGSTcUBrOK6E2kChjw/viewform?usp=pp_url&entry.1016353547=](https://docs.google.com/forms/d/e/1FAIpQLScCTcg6ITFMXs9QpQEAvN92GI06wtSTiGSTcUBrOK6E2kChjw/viewform?usp=pp_url&entry.1016353547=)",
+                    taxon, "&entry.764274277=", countyFIPS, "&entry.763749150=", state, 
+                    "&entry.1585476570=", county, "&entry.1304312867=", recordID),
+      `report issue link` = paste0("<a target='_blank' href='", link, "'>link</a>")
+    ) |>
+    dplyr::select(taxon, state, county, databaseSource, collectionSource, type, 
+                  `report issue link`, localityInformation, yearRecorded, latitude, longitude)
+
+  DT::datatable(fnaFiltered, rownames = FALSE, width = "100%", filter = "top", escape = FALSE)
+}
+```

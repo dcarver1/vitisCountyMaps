@@ -1,0 +1,141 @@
+/* --- Color Palette & Variables --- */
+:root {
+  --vine-green: #2d6a4f;       /* Deep green for primary headers and active tabs */
+  --grape-purple: #5e3c58;     /* Muted purple for links and accents */
+  --leaf-light: #d8f3dc;       /* Very light green for table rows/accents */
+  --earth-bg: #fdfdfc;         /* Off-white background to reduce eye strain */
+  --text-dark: #2b2b2b;        /* Charcoal for main text (better than pure black) */
+  --text-muted: #596b7d;       /* Muted gray for secondary text */
+}
+
+/* --- Global Typography & Body --- */
+body {
+  background-color: var(--earth-bg);
+  color: var(--text-dark);
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Constrain width for optimal reading line length */
+.main-container {
+  max-width: 1200px; 
+  margin: 0 auto;
+  padding: 20px 40px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-radius: 8px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* --- Headings --- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: Georgia, 'Times New Roman', serif; /* Serif adds an academic/botanical feel */
+  font-weight: 600;
+  color: var(--vine-green);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: 2.5em;
+  border-bottom: 2px solid var(--leaf-light);
+  padding-bottom: 10px;
+}
+
+h2 {
+  font-size: 1.8em;
+  color: var(--grape-purple);
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 8px;
+}
+
+/* --- Links --- */
+a {
+  color: var(--grape-purple);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px dotted var(--grape-purple);
+  transition: all 0.2s ease-in-out;
+}
+
+a:hover {
+  color: var(--vine-green);
+  border-bottom: 1px solid var(--vine-green);
+}
+
+/* --- R Markdown Tabsets --- */
+.nav-tabs {
+  border-bottom: 2px solid var(--leaf-light);
+  margin-bottom: 20px;
+}
+
+.nav-tabs > li > a {
+  color: var(--text-muted);
+  font-weight: 600;
+  border: none;
+  border-radius: 4px 4px 0 0;
+}
+
+.nav-tabs > li > a:hover {
+  background-color: var(--leaf-light);
+  color: var(--vine-green);
+  border: none;
+}
+
+.nav-tabs > li.active > a, 
+.nav-tabs > li.active > a:hover, 
+.nav-tabs > li.active > a:focus {
+  color: white;
+  background-color: var(--vine-green);
+  border: none;
+}
+
+/* --- Images & Logos --- */
+img {
+  border-radius: 4px;
+}
+
+/* --- DataTables Overrides --- */
+/* Make tables highly legible with subtle striping */
+table.dataTable thead th {
+  background-color: var(--vine-green);
+  color: white;
+  border-bottom: none !important;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+table.dataTable.display tbody tr.odd {
+  background-color: #fafafa;
+}
+
+table.dataTable.display tbody tr.even {
+  background-color: white;
+}
+
+table.dataTable.display tbody tr:hover {
+  background-color: var(--leaf-light) !important; /* Highlight row on hover */
+}
+
+/* DataTables pagination buttons */
+.dataTables_wrapper .dataTables_paginate .paginate_button.current, 
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  background: var(--vine-green);
+  color: white !important;
+  border: 1px solid var(--vine-green);
+  border-radius: 4px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: var(--leaf-light);
+  color: var(--vine-green) !important;
+  border: 1px solid transparent;
+}
+
+/* --- Map Container --- */
+.leaflet-container {
+  border: 2px solid #eaeaea;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
