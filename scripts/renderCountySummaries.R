@@ -1,10 +1,12 @@
 # renderCountySummaries.R
 # Main execution script for generating Vitis county evaluation maps
 
-pacman::p_load(dplyr, readr, sf, terra, htmltools, googledrive, googlesheets4, purrr, rmarkdown)
+pacman::p_load(dplyr, readr, sf, terra, htmltools, googledrive, googlesheets4, purrr, rmarkdown,stringr)
 
 # 1. Load configuration and helper functions
-list.files("R/functions", full.names = TRUE) |> purrr::walk(source)
+source("scripts/config.R") # Load configuration settings
+# source functions 
+list.files("R", full.names = TRUE) |> purrr::walk(source)
 
 
 # 2. Read base datasets
@@ -73,5 +75,10 @@ generate_occurrence_rmd <- function(species_name) {
 }
 
 # 5. Execute
-# purrr::walk(full_species, generate_occurrence_rmd) # Uncomment to run full batch
-generate_occurrence_rmd(species_name = "Vitis baileyana") # Test single run
+purrr::walk(full_species, generate_occurrence_rmd) # Uncomment to run full batch
+#issues with "Vitis rotundifolia var. munsoniana", "Vitis cinerea"
+for(species in full_species[10:28]) {
+  print(species)
+  generate_occurrence_rmd(species)
+}
+generate_occurrence_rmd(species_name = "Vitis girdiana") # Test single run

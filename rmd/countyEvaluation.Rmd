@@ -8,6 +8,14 @@ params:
   data: NA
 ---
 
+<style type="text/css">
+/* Force the R Markdown container to use 95% of the screen width */
+.main-container {
+  max-width: 95% !important;
+  margin: auto;
+}
+</style>
+
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
 # Load only the packages required for visualization and presentation
 pacman::p_load("leaflet", "dplyr", "DT", "sf", "htmltools")
@@ -23,7 +31,7 @@ tables <- params$data$tables
 
 <h1 style="text-align: center;"> `r meta$speciesName` </h1>
 
-<strong style="text-align: center;">This project is a collaboration among the [United States Botanic Garden](https://www.usbg.gov/), [San Diego Botanic Garden](https://sdbg.org/), [USDA ARS](https://www.ars.usda.gov/),  [Geospatial Centroid](https://gis.colostate.edu/) at Colorado State Univeristy, and [NatureServe](https://www.natureserve.org/). We are all grateful for your time and consideration in this evaluation effort. </strong>
+<strong style="text-align: center;">This project is a collaboration among the <a href="https://www.usbg.gov/">United States Botanic Garden</a>, <a href="https://sdbg.org/">San Diego Botanic Garden</a>, <a href="https://www.ars.usda.gov/">USDA ARS</a>, <a href="https://gis.colostate.edu/">Geospatial Centroid</a> at Colorado State University, and <a href="https://www.natureserve.org/">NatureServe</a>. We are all grateful for your time and consideration in this evaluation effort. </strong>
 
 <a href="https://geospatialcentroid.github.io/vitis/home" target="_blank">Vitis Home Page</a>
 <br>
@@ -122,8 +130,7 @@ if(nrow(layers$points) == 0){
   rr <- tags$div(HTML(paste0("<h3>", meta$speciesName , "</h3>")))  
 
   m1 <- leaflet(width = "100%", height = 800, options = leafletOptions(minZoom = 3)) |>
-    addTiles(urlTemplate = '[https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/](https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/){z}/{y}/{x}', 
-             attribution = 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ') |>
+    addProviderTiles(providers$Esri.WorldGrayCanvas) |>
     addMapPane("anyRecord", zIndex = 414) |>
     addMapPane("sumOfRecords", zIndex = 415) |>
     addMapPane("bpData", zIndex = 418) |>
@@ -218,15 +225,20 @@ This table includes all records used to generate the map.
 
 ```{r occurrenceDataSummary, echo=FALSE, message=FALSE, warning=FALSE}
 occFiltered <- tables$occFiltered |>
-  dplyr::select(
+  dplyr::select(dplyr::any_of(c(
+    "taxon", "state", "county", "stateFIPS", "countyFIPS", "spatial_match_type",
+    "databaseSource", "type", "observerName", "localityInformation", "yearRecorded", "sourceUniqueID"
+  ))) |>
+  dplyr::rename(
     Taxon = taxon, State = state, County = county,
+    `State FIPS` = stateFIPS, `County FIPS` = countyFIPS, `Match Type` = spatial_match_type,
     `Data Source` = databaseSource, Type = type,
     `Collector's Name` = observerName,
     `Locality Description` = localityInformation,
     Year = yearRecorded, `Source ID` = sourceUniqueID
   )
 
-DT::datatable(occFiltered, rownames = FALSE, width = "100%", filter = "top")
+DT::datatable(occFiltered, rownames = FALSE, width = "100%", filter = "top", options = list(scrollX = TRUE))
 ```
 
 ## Data summarized to each County 
@@ -235,16 +247,17 @@ The table below displays additional attribute data for all the counties with kno
 
 ```{r countyDataTable, echo=FALSE, message=FALSE, warning=FALSE}
 df <- tables$countySummary |>
-  dplyr::select(-allColor, -fips2, -popup, -singleColor) |>
-  dplyr::arrange(REGION) |>
-  dplyr::rename(
-    `County Name` = NAME, GEOID = FIPS, `State Abbreviation` = REGION,
-    `iNaturalist Observation` = O, `Herbarium Occurrence` = H,
-    `Germplasm Occurrence` = G, `Pre 1970 Records` = pre1970,
-    `All Records Score` = anyRecord
-  ) 
+  dplyr::select(-dplyr::any_of(c("allColor", "popup", "singleColor"))) |>
+  # arrange by state name if available, handle potential column name differences safely
+  dplyr::arrange(dplyr::across(dplyr::any_of(c("state", "STATE_NAME", "REGION")))) |>
+  dplyr::rename(dplyr::any_of(c(
+    `County Name` = "NAME", GEOID = "FIPS", `State Abbreviation` = "state", `State Abbreviation` = "REGION", `State Abbreviation` = "STATE_NAME",
+    `iNaturalist Observation` = "O", `Herbarium Occurrence` = "H",
+    `Germplasm Occurrence` = "G", `Pre 1970 Records` = "pre1970",
+    `All Records Score` = "anyRecord"
+  )))
 
-DT::datatable(df, rownames = FALSE, filter = "top")
+DT::datatable(df, rownames = FALSE, width = "100%", filter = "top", options = list(scrollX = TRUE))
 ```
 
 ## Data excluded by Flora of North America state filter
@@ -268,9 +281,12 @@ if(!meta$fnaIncluded){
                     "&entry.1585476570=", county, "&entry.1304312867=", recordID),
       `report issue link` = paste0("<a target='_blank' href='", link, "'>link</a>")
     ) |>
-    dplyr::select(taxon, state, county, databaseSource, collectionSource, type, 
-                  `report issue link`, localityInformation, yearRecorded, latitude, longitude)
+    dplyr::select(dplyr::any_of(c(
+      "taxon", "state", "county", "stateFIPS", "countyFIPS", "spatial_match_type",
+      "databaseSource", "collectionSource", "type", 
+      "report issue link", "localityInformation", "yearRecorded", "latitude", "longitude"
+    )))
 
-  DT::datatable(fnaFiltered, rownames = FALSE, width = "100%", filter = "top", escape = FALSE)
+  DT::datatable(fnaFiltered, rownames = FALSE, width = "100%", filter = "top", escape = FALSE, options = list(scrollX = TRUE))
 }
 ```

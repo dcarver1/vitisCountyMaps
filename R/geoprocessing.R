@@ -1,5 +1,4 @@
 # R/geoprocessing.R
-pacman::p_load(dplyr, sf, stringr, tidyr)
 
 prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData, synData,
                               natureSeverData, observationData, fnaData, countySHP, origData,
@@ -14,9 +13,11 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
   species <- dplyr::tibble(`Scientific Name` = speciesName) |>
     dplyr::left_join(plantsSpecies, by = "Scientific Name")
 
-  #need to join the occurrence  ith the origil county p  to get the stend county FIPS. I correctly noted in the data
+  # need to join the occurrence  ith the origil county p  to get the stend county FIPS. I correctly noted in the data
+  ob1 <- observationData |> dplyr::filter(taxon == speciesName) 
+  or1 <- origData |> dplyr::filter(taxon == speciesName) 
+  # join the data on the localityInformation field to get the countyFIPS
 
-  
   s1 <- synData |> 
     dplyr::filter(taxon == speciesName) |>
     as.data.frame() |>
@@ -74,11 +75,16 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
     rCounty <- countyGathered[0,]
   }
   
-  # --- 4. Occurrence Data & FNA Filtering ---
+# --- 4. Occurrence Data & Spatial Assignment ---
   occData <- observationData |>
-    dplyr::filter(taxon == speciesName)|>
+    dplyr::filter(taxon == speciesName) |>
     dplyr::mutate(type = dplyr::case_when(sampleCategory == "HUMAN_OBSERVATION" ~ "O", TRUE ~ type)) |>
-    dplyr::distinct()
+    dplyr::distinct() 
+  
+  # Assign state and county FIPS 
+  occData <- assign_spatial_attributes(occData, countySHP)
+  # assign the unique record id to the occData 
+  occData <- occData |> dplyr::mutate(recordID = paste0(databaseSource, "_", sourceUniqueID))
   
   # Handle reviewed points
   if(nrow(reviewedPoints1) > 0) {
@@ -87,42 +93,66 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
       dplyr::left_join(reviewedPoints1, by = c("recordID" = "Record ID for point")) |>
       dplyr::mutate(popup = paste0("<b>Suggested Action:</b> ", `Suggested Action for this Occurrence: select one`, 
                                    "<br/><b>Comments:</b> ", Comments))
+    
+    # Remove reviewed points from the main processing pool
     occData <- occData |> dplyr::filter(!recordID %in% reviewedPoints1$`Record ID for point`)
   } else {
     rPoints <- occData[0,]
   }
   
-  # FNA Filter Logic
-  fnaData <- fnaData[!fnaData$`States from FNA` == "NA,", ]
-  if(speciesName %in% fnaData$`Taxon Name`) {
-    fna1 <- fnaData |> dplyr::filter(`Taxon Name` == speciesName) |> dplyr::pull(`States from FNA`) |>
-      stringr::str_split(pattern = ",") |> unlist() |> stringr::str_trim() |> stringr::str_subset(".+")
-    state1 <- fna1[fna1 != "NA"]
-    all_states <- stateSHP |> dplyr::filter(name %in% state1)
+  # ==========================================
+  # PRIMARY STEP: FNA Filter Logic
+  # ==========================================
+  
+  # Check if the species is in the FNA database AND has a valid string (not "NA,")
+  is_in_fna <- speciesName %in% fnaData$`Taxon Name`
+  
+  # Get the raw string for safety check
+  raw_fna_states <- if(is_in_fna) {
+    fnaData |> dplyr::filter(`Taxon Name` == speciesName) |> dplyr::pull(`States from FNA`)
+  } else { "NA" }
+  
+  
+  if (is_in_fna && length(raw_fna_states) > 0 && raw_fna_states != "NA," && raw_fna_states != "NA") {
+    
     FNAspecies <- TRUE
+    
+    # Clean and extract the expected states from FNA
+    expected_states <- raw_fna_states |>
+      stringr::str_split(pattern = ",") |> 
+      unlist() |> 
+      stringr::str_trim() |> 
+      stringr::str_subset(".+")
+    
+    expected_states <- expected_states[expected_states != "NA"]
+    
+    # SPLIT THE DATA: Inside expected states vs Outside expected states
+    occFNAFilter <- occData |> dplyr::filter(!state %in% expected_states)
+    occData      <- occData |> dplyr::filter(state %in% expected_states)
+    
+    # Build the spatial object for mapping based on FNA states
+    # (Note: make sure stateSHP uses "NAME" or "name" consistently depending on your shapefile)
+    all_states <- stateSHP |> dplyr::filter(NAME %in% expected_states)
+    
   } else {
-    fna1 <- "no"
-    state1 <- unique(occData$state)
-    # UPDATED: Mapping to STUSPS to derive state names
-    state_CountyData <- stateSHP |>
-      dplyr::filter(NAME %in% state1) |> 
-      sf::st_drop_geometry() |> 
-      dplyr::pull(NAME)
-    all_states <- stateSHP |> 
-      dplyr::filter(NAME %in% state_CountyData)
+    
     FNAspecies <- FALSE
+    
+    # PASS-THROUGH: No records are filtered out because there is no FNA constraint
+    occFNAFilter <- occData[0,] 
+    
+    # Build the spatial object based empirically on whatever states exist in the occurrence data
+    empirical_states <- unique(occData$state[!is.na(occData$state)])
+    all_states <- stateSHP |> dplyr::filter(NAME %in% empirical_states)
   }
-  
-  occFNAFilter <- occData |>
-    dplyr::filter(!state %in% all_states$NAME)
-  occData <- occData |> dplyr::filter(state %in% all_states$NAME)
-  
+
+
+
   # --- 5. Spatial Data Generation ---
   sp1 <- occData |> 
     dplyr::filter(!is.na(latitude), iso3 != "CAN", iso3 != "MEX") |>
     sf::st_as_sf(coords = c("longitude", "latitude"), crs = sf::st_crs(stateSHP))
   # ensure that the countyFIPS is in the sp1 data 
-
 
   countyCounts <- occData |> 
     dplyr::group_by(type, countyFIPS) |> 
@@ -130,7 +160,7 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
   
   # UPDATED: Simplified county gathering based on GEOID and STUSPS
   countyState <- countySHP |> 
-    dplyr::filter(STUSPS %in% all_states$postal) |>
+    dplyr::filter(STUSPS %in% all_states$STUSPS) |>
     dplyr::select(NAME, GEOID, STUSPS)
   
   sp2 <- sp1 |> dplyr::filter(is.na(yearRecorded) | yearRecorded >= 1970)

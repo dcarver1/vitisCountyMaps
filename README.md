@@ -15,3 +15,5 @@ vitisCountyMaps/
 │   └── maps/         # Generated county map outputs
 └── docs/             # Project documentation
 ```
+# next steps 
+enerate a summary data set thatmbines infrmatin frm all f the spies. This will then get integrated int the spent sptted lantern flying methds as well as sur material fr the publatin. Bring all thsede bases int this rep just t keep everything in ne ple.

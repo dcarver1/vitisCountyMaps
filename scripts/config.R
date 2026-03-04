@@ -1,6 +1,5 @@
 # config.R
 # Define all file paths and external URLs for the county evaluation workflow
-
 config <- list(
   paths = list(
     # Raw Data
@@ -20,7 +19,7 @@ config <- list(
     
     # Outputs & Templates
     pb_output        = "data/processed/vitis_plants_bonap.csv",
-    rmd_template     = "scripts/countyEvaluation.Rmd",
+    rmd_template     = "rmd/countyEvaluation.Rmd",
     output_dir       = "output/maps"
   ),
   urls = list(
