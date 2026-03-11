@@ -20,3 +20,4 @@ data/raw/*.zip
 data/processed/*.csv
 data/processed/*.rds
 data/processed/*.RData
+.Rproj.user

@@ -20,10 +20,23 @@ params:
 # Load only the packages required for visualization and presentation
 pacman::p_load("leaflet", "dplyr", "DT", "sf", "htmltools")
 
-# Unpack the pre-processed data bundle
+if(FALSE){
+  # Unpack the pre-processed data bundle
 meta   <- params$data$meta
 layers <- params$data$map_layers
 tables <- params$data$tables
+}else{
+  #testing 
+meta   <- data$meta
+layers <- data$map_layers
+tables <- data$tables
+}
+
+
+
+
+
+
 ```
 
 <img src="logobanner.png" alt="Supporting Organizations" style="width: 100%">
@@ -125,6 +138,72 @@ If state level distribution information was provided for a given specific specie
 if(nrow(layers$points) == 0){
   print("There is no spatial data for this species and no map can be produced.")
 } else {
+
+  # ---------------------------------------------------------
+  # 1. GENERATE DYNAMIC POPUPS AND URLS
+  # ---------------------------------------------------------
+  
+  # Point layer popups
+  layers$points <- layers$points |>
+    dplyr::mutate(
+      link = paste0("[https://docs.google.com/forms/d/e/1FAIpQLScCTcg6ITFMXs9QpQEAvN92GI06wtSTiGSTcUBrOK6E2kChjw/viewform?usp=pp_url&entry.1016353547=](https://docs.google.com/forms/d/e/1FAIpQLScCTcg6ITFMXs9QpQEAvN92GI06wtSTiGSTcUBrOK6E2kChjw/viewform?usp=pp_url&entry.1016353547=)",
+                    taxon, "&entry.764274277=", countyFIPS, "&entry.763749150=", state,
+                    "&entry.1585476570=", county, "&entry.1304312867=", recordID),
+      url_formatted = dplyr::case_when(
+        grepl("http", x = sourceUniqueID) ~ paste0("<a target='_blank' href=\"", sourceUniqueID, "\">view</a>"),
+        grepl("http", x = collectionSource) ~ paste0("<a target='_blank' href=\"", collectionSource, "\">view</a>"),
+        TRUE ~ "NA"
+      ),
+      popup = paste0(
+        "<b>Taxon: </b>", taxon,
+        "<br/> <b>Data Source: </b>", databaseSource,
+        "<br/> <b> Record ID: </b>", sourceUniqueID,
+        "<br/> <b> Type: </b>", type,
+        "<br/> <b> Year: </b>", yearRecorded,
+        "<br/> <b> Recorder Name: </b>", observerName,
+        "<br/> <b> Location Description: </b>", localityInformation,
+        "<br/> <b> External Reference: </b>", url_formatted,
+        "<br/> <b> Report Issue: </b><a target='_blank' href=\"", link, "\">click here</a>"
+      )
+    )
+
+  # Function to generate county popups so we can apply it to all county sub-layers
+  generate_county_popup <- function(df) {
+    if (nrow(df) == 0) return(df)
+    df |>
+      dplyr::mutate(
+        # FIX: Changed FIPS to fips2 to match your original data structure
+        link = paste0("https://docs.google.com/forms/d/e/1FAIpQLScCTcg6ITFMXs9QpQEAvN92GI06wtSTiGSTcUBrOK6E2kChjw/viewform?usp=pp_url&entry.1016353547=",
+                      meta$speciesName, "&entry.764274277=", GEOID,
+                      "&entry.763749150=", STUSPS, "&entry.1585476570=", NAME, "&entry.1304312867=", "NA"),
+        USDAPlantsPop = dplyr::case_when(`USDA Plants` == 1 ~ "Yes", TRUE ~ "No"),
+        BONAPPop = dplyr::case_when(`BONAP` == 1 ~ "Yes", TRUE ~ "No"),
+        NatureServePop = dplyr::case_when(`Nature Serve` == 1 ~ "Yes", TRUE ~ "No"),
+        popup = paste0(
+          "<b>County Name: </b>", NAME,
+          "<br/> <b>State: </b>", STUSPS,
+          "<br/> <b> Listed in USDA Plants: </b>", USDAPlantsPop,
+          "<br/> <b> Listed in BONAP: </b>", BONAPPop,
+          "<br/> <b> Listed in Nature Serve: </b>", NatureServePop,
+          "<br/> <b> Number of observations records: </b>", O,
+          "<br/> <b> Number of herbarium records: </b>", H,
+          "<br/> <b> Number of germplasm records: </b>", G,
+          "<br/> <b> Number of records before 1970: </b>", pre1970,
+          "<br/> <b> All Records: </b>", anyRecord,
+          "<br/> <b> Report Issue: </b><a target='_blank' href=\"", link, "\">click here</a>"
+        )
+      )
+  }
+  # Apply popup generation to all county layers
+  layers$countyClass <- generate_county_popup(layers$countyClass)
+  layers$bpData      <- generate_county_popup(layers$bpData)
+  layers$hgData      <- generate_county_popup(layers$hgData)
+  layers$oData       <- generate_county_popup(layers$oData)
+
+
+  # ---------------------------------------------------------
+  # 2. BUILD THE MAP
+  # ---------------------------------------------------------
 
   # Base Map Setup
   rr <- tags$div(HTML(paste0("<h3>", meta$speciesName , "</h3>")))  
@@ -285,7 +364,9 @@ if(!meta$fnaIncluded){
       "taxon", "state", "county", "stateFIPS", "countyFIPS", "spatial_match_type",
       "databaseSource", "collectionSource", "type", 
       "report issue link", "localityInformation", "yearRecorded", "latitude", "longitude"
-    )))
+    ))) |>
+    # ADDED: Convert all character columns to UTF-8, replacing invalid characters with nothing
+    dplyr::mutate(dplyr::across(dplyr::where(is.character), ~ iconv(.x, to = "UTF-8", sub = "")))
 
   DT::datatable(fnaFiltered, rownames = FALSE, width = "100%", filter = "top", escape = FALSE, options = list(scrollX = TRUE))
 }

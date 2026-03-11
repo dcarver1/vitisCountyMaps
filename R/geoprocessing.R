@@ -12,12 +12,11 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
   
   species <- dplyr::tibble(`Scientific Name` = speciesName) |>
     dplyr::left_join(plantsSpecies, by = "Scientific Name")
-
-  # need to join the occurrence  ith the origil county p  to get the stend county FIPS. I correctly noted in the data
+  
+  # need to join the occurrence with the original county p to get the stend county FIPS. I correctly noted in the data
   ob1 <- observationData |> dplyr::filter(taxon == speciesName) 
   or1 <- origData |> dplyr::filter(taxon == speciesName) 
-  # join the data on the localityInformation field to get the countyFIPS
-
+  
   s1 <- synData |> 
     dplyr::filter(taxon == speciesName) |>
     as.data.frame() |>
@@ -30,7 +29,8 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
                   Classification_Status_NatureServe = `Classification Status NatureServe`) |>
     dplyr::slice(1)
   
-  nsRefData2 <- nsRefData |> dplyr::filter(`Scientific Name` == speciesName) |>
+  nsRefData2 <- nsRefData |> 
+    dplyr::filter(`Scientific Name` == speciesName) |>
     dplyr::mutate(link = `View on NatureServe Explorer`)
   
   # --- 2. Reviewed Data Subsetting ---
@@ -38,7 +38,7 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
   reviewedCounty1 <- reviewedCounty[reviewedCounty$Taxon == speciesName, ]
   
   # --- 3. County Reference Data (USDA/BONAP/NatureServe) ---
-  if(!is.na(species$plant_symbol)) {
+  if (!is.na(species$plant_symbol)) {
     plantsData <- plantsData1 |> 
       dplyr::filter(plant_symbol == species$plant_symbol) |>
       dplyr::mutate(plantsData = stringr::str_sub(geoid, start = 3, end = 7)) |>
@@ -63,19 +63,21 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
     dplyr::filter(allCountySources != "  ")
   
   # Handle reviewed counties
-  if(nrow(reviewedCounty1) > 0) {
+  if (nrow(reviewedCounty1) > 0) {
     reviewedCounty1$GEOID <- as.character(unlist(reviewedCounty1$`GEOID for County`))
+    
     rCounty <- countySHP |>
       dplyr::filter(GEOID %in% reviewedCounty1$GEOID) |>
       dplyr::left_join(reviewedCounty1, by = "GEOID") |>
       dplyr::mutate(popup = paste0("<b>Suggested Action:</b> ", `Suggested Action for this Occurrence: select one`, 
                                    "<br/><b>Comments:</b> ", Comments))
+    
     countyGathered <- countyGathered |> dplyr::filter(!GEOID %in% reviewedCounty1$GEOID)
   } else {
-    rCounty <- countyGathered[0,]
+    rCounty <- countyGathered[0, ]
   }
   
-# --- 4. Occurrence Data & Spatial Assignment ---
+  # --- 4. Occurrence Data & Spatial Assignment ---
   occData <- observationData |>
     dplyr::filter(taxon == speciesName) |>
     dplyr::mutate(type = dplyr::case_when(sampleCategory == "HUMAN_OBSERVATION" ~ "O", TRUE ~ type)) |>
@@ -83,11 +85,12 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
   
   # Assign state and county FIPS 
   occData <- assign_spatial_attributes(occData, countySHP)
+  
   # assign the unique record id to the occData 
   occData <- occData |> dplyr::mutate(recordID = paste0(databaseSource, "_", sourceUniqueID))
   
   # Handle reviewed points
-  if(nrow(reviewedPoints1) > 0) {
+  if (nrow(reviewedPoints1) > 0) {
     rPoints <- occData |>
       dplyr::filter(recordID %in% reviewedPoints1$`Record ID for point`) |>
       dplyr::left_join(reviewedPoints1, by = c("recordID" = "Record ID for point")) |>
@@ -97,7 +100,7 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
     # Remove reviewed points from the main processing pool
     occData <- occData |> dplyr::filter(!recordID %in% reviewedPoints1$`Record ID for point`)
   } else {
-    rPoints <- occData[0,]
+    rPoints <- occData[0, ]
   }
   
   # ==========================================
@@ -108,10 +111,11 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
   is_in_fna <- speciesName %in% fnaData$`Taxon Name`
   
   # Get the raw string for safety check
-  raw_fna_states <- if(is_in_fna) {
+  raw_fna_states <- if (is_in_fna) {
     fnaData |> dplyr::filter(`Taxon Name` == speciesName) |> dplyr::pull(`States from FNA`)
-  } else { "NA" }
-  
+  } else { 
+    "NA" 
+  }
   
   if (is_in_fna && length(raw_fna_states) > 0 && raw_fna_states != "NA," && raw_fna_states != "NA") {
     
@@ -131,29 +135,28 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
     occData      <- occData |> dplyr::filter(state %in% expected_states)
     
     # Build the spatial object for mapping based on FNA states
-    # (Note: make sure stateSHP uses "NAME" or "name" consistently depending on your shapefile)
     all_states <- stateSHP |> dplyr::filter(NAME %in% expected_states)
     
   } else {
     
     FNAspecies <- FALSE
     
+    # Initialize as empty so the return list doesn't crash on non-FNA species
+    expected_states <- character(0) 
+    
     # PASS-THROUGH: No records are filtered out because there is no FNA constraint
-    occFNAFilter <- occData[0,] 
+    occFNAFilter <- occData[0, ] 
     
     # Build the spatial object based empirically on whatever states exist in the occurrence data
     empirical_states <- unique(occData$state[!is.na(occData$state)])
     all_states <- stateSHP |> dplyr::filter(NAME %in% empirical_states)
   }
-
-
-
+  
   # --- 5. Spatial Data Generation ---
   sp1 <- occData |> 
     dplyr::filter(!is.na(latitude), iso3 != "CAN", iso3 != "MEX") |>
     sf::st_as_sf(coords = c("longitude", "latitude"), crs = sf::st_crs(stateSHP))
-  # ensure that the countyFIPS is in the sp1 data 
-
+  
   countyCounts <- occData |> 
     dplyr::group_by(type, countyFIPS) |> 
     dplyr::summarise(count = dplyr::n(), .groups = 'drop')
@@ -166,32 +169,46 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
   sp2 <- sp1 |> dplyr::filter(is.na(yearRecorded) | yearRecorded >= 1970)
   older <- sp1 |> dplyr::filter(yearRecorded < 1970)
   
+  # Force countyFIPS to be a character type so it matches GEOID
+  countyCounts <- countyCounts |>
+    dplyr::mutate(countyFIPS = as.character(countyFIPS))
+  
   # Summarize by type
-  for(i in c("O", "H", "G")) {
-    c2 <- countyCounts |> dplyr::filter(type == i) |> dplyr::select(countyFIPS, !!sym(i) := count)
+  for (i in c("O", "H", "G")) {
+    c2 <- countyCounts |> 
+      dplyr::filter(type == i) |> 
+      dplyr::select(countyFIPS, !!sym(i) := count)
+    
     countyState <- dplyr::left_join(countyState, c2, by = c("GEOID" = "countyFIPS"))
   }
   
   # Pre-1970 records
-  if(nrow(older) > 0) {
+  if (nrow(older) > 0) {
     df2 <- countyState[unlist(sf::st_intersects(older, countyState)), "GEOID"] |>
-      sf::st_drop_geometry() |> dplyr::group_by(GEOID) |> dplyr::summarise(pre1970 = dplyr::n())
+      sf::st_drop_geometry() |> 
+      dplyr::group_by(GEOID) |> 
+      dplyr::summarise(pre1970 = dplyr::n())
+    
     countyState <- dplyr::left_join(countyState, df2, by = "GEOID")
   } else {
-    countyState$pre1970 <- NA
+    # Use mutate to safely add the column, even if countyState has 0 rows
+    countyState <- countyState |> 
+      dplyr::mutate(pre1970 = NA_integer_) 
   }
-  
   # Join gathered features and calc total
-  c2 <- countyGathered |> sf::st_drop_geometry() |>
+  c2 <- countyGathered |> 
+    sf::st_drop_geometry() |>
     dplyr::select(GEOID, `USDA Plants` = plants, BONAP = bonap, `Nature Serve` = natureServe) |>
-    dplyr::mutate(across(c(`USDA Plants`, BONAP, `Nature Serve`), ~ifelse(!is.na(.), 1, NA)))
+    dplyr::mutate(dplyr::across(c(`USDA Plants`, BONAP, `Nature Serve`), ~ifelse(!is.na(.), 1, NA)))
   
   countyState <- dplyr::left_join(countyState, c2, by = "GEOID") |>
-    dplyr::rowwise() |> dplyr::mutate(anyRecord = sum(c_across(c(O, H, G, `USDA Plants`, BONAP, `Nature Serve`)), na.rm = TRUE)) |> dplyr::ungroup()
+    dplyr::rowwise() |> 
+    dplyr::mutate(anyRecord = sum(dplyr::c_across(c(O, H, G, `USDA Plants`, BONAP, `Nature Serve`)), na.rm = TRUE)) |> 
+    dplyr::ungroup()
   
   # Export table
-  if(!is.null(export_dir)) {
-    if(!dir.exists(export_dir)) dir.create(export_dir, recursive = TRUE)
+  if (!is.null(export_dir)) {
+    if (!dir.exists(export_dir)) dir.create(export_dir, recursive = TRUE)
     readr::write_csv(sf::st_drop_geometry(countyState), file.path(export_dir, paste0(speciesName, ".csv")))
   }
   
@@ -234,8 +251,8 @@ prep_species_data <- function(speciesName, namedFeatures, plantsData1, bonapData
       synonyms = s1,
       nsRef = nsRefData2,
       fnaIncluded = FNAspecies,
-      fnaStates = fna1,
-      allStateNames = all_states$name
+      fnaStates = expected_states,    
+      allStateNames = all_states$NAME 
     ),
     map_layers = list(
       countyClass = countyClass,
