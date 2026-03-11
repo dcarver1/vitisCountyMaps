@@ -1,0 +1,309 @@
+FIPS,State,County,Total_Observations
+36061,New York,New York,2743
+42003,Pennsylvania,Allegheny,1612
+36047,New York,Kings,1336
+42101,Pennsylvania,Philadelphia,1257
+34027,New Jersey,Morris,999
+42091,Pennsylvania,Montgomery,936
+24005,Maryland,Baltimore,759
+36005,New York,Bronx,659
+36081,New York,Queens,659
+34023,New Jersey,Middlesex,605
+42011,Pennsylvania,Berks,578
+34035,New Jersey,Somerset,537
+42107,Pennsylvania,Schuylkill,522
+39035,Ohio,Cuyahoga,521
+42029,Pennsylvania,Chester,493
+10003,Delaware,New Castle,465
+36119,New York,Westchester,458
+42071,Pennsylvania,Lancaster,406
+34013,New Jersey,Essex,391
+34003,New Jersey,Bergen,386
+42017,Pennsylvania,Bucks,381
+42045,Pennsylvania,Delaware,359
+34025,New Jersey,Monmouth,313
+36085,New York,Richmond,313
+34021,New Jersey,Mercer,309
+42043,Pennsylvania,Dauphin,268
+42095,Pennsylvania,Northampton,242
+34005,New Jersey,Burlington,230
+34039,New Jersey,Union,226
+36059,New York,Nassau,222
+24043,Maryland,Washington,215
+24025,Maryland,Harford,213
+34017,New Jersey,Hudson,212
+34019,New Jersey,Hunterdon,208
+34007,New Jersey,Camden,202
+24027,Maryland,Howard,200
+34015,New Jersey,Gloucester,188
+34029,New Jersey,Ocean,183
+42077,Pennsylvania,Lehigh,182
+42133,Pennsylvania,York,173
+36087,New York,Rockland,153
+34041,New Jersey,Warren,144
+24015,Maryland,Cecil,140
+24021,Maryland,Frederick,139
+34001,New Jersey,Atlantic,137
+39095,Ohio,Lucas,137
+24003,Maryland,Anne Arundel,134
+51069,Virginia,Frederick,134
+51153,Virginia,Prince William,129
+09001,Connecticut,Fairfield,125
+34031,New Jersey,Passaic,119
+42041,Pennsylvania,Cumberland,115
+51680,Virginia,Lynchburg city,104
+42089,Pennsylvania,Monroe,97
+42075,Pennsylvania,Lebanon,86
+36103,New York,Suffolk,84
+51043,Virginia,Clarke,84
+54037,West Virginia,Jefferson,81
+51840,Virginia,Winchester city,77
+34037,New Jersey,Sussex,76
+42125,Pennsylvania,Washington,76
+24013,Maryland,Carroll,74
+51187,Virginia,Warren,73
+42129,Pennsylvania,Westmoreland,70
+51107,Virginia,Loudoun,69
+51061,Virginia,Fauquier,61
+51059,Virginia,Fairfax,57
+42079,Pennsylvania,Luzerne,56
+24001,Maryland,Allegany,55
+24031,Maryland,Montgomery,54
+36071,New York,Orange,52
+42055,Pennsylvania,Franklin,51
+42069,Pennsylvania,Lackawanna,51
+24029,Maryland,Kent,47
+51165,Virginia,Rockingham,46
+42007,Pennsylvania,Beaver,45
+34009,New Jersey,Cape May,44
+24035,Maryland,Queen Anne's,43
+42001,Pennsylvania,Adams,43
+34033,New Jersey,Salem,41
+10001,Delaware,Kent,40
+39049,Ohio,Franklin,38
+54003,West Virginia,Berkeley,38
+09009,Connecticut,New Haven,37
+42025,Pennsylvania,Carbon,35
+39061,Ohio,Hamilton,33
+51139,Virginia,Page,33
+24033,Maryland,Prince George's,32
+51157,Virginia,Rappahannock,31
+42037,Pennsylvania,Columbia,29
+42061,Pennsylvania,Huntingdon,28
+36111,New York,Ulster,27
+42099,Pennsylvania,Perry,27
+39173,Ohio,Wood,26
+42027,Pennsylvania,Centre,26
+51013,Virginia,Arlington,26
+34011,New Jersey,Cumberland,25
+39093,Ohio,Lorain,25
+13121,Georgia,Fulton,24
+42093,Pennsylvania,Montour,23
+42019,Pennsylvania,Butler,22
+42103,Pennsylvania,Pike,22
+42013,Pennsylvania,Blair,19
+51003,Virginia,Albemarle,19
+51820,Virginia,Waynesboro city,17
+51047,Virginia,Culpeper,15
+25027,Massachusetts,Worcester,14
+39029,Ohio,Columbiana,14
+51019,Virginia,Bedford,14
+51510,Virginia,Alexandria city,14
+51660,Virginia,Harrisonburg city,14
+17031,Illinois,Cook,12
+39081,Ohio,Jefferson,12
+51015,Virginia,Augusta,12
+51683,Virginia,Manassas city,12
+39099,Ohio,Mahoning,11
+42097,Pennsylvania,Northumberland,11
+39043,Ohio,Erie,10
+42021,Pennsylvania,Cambria,10
+42067,Pennsylvania,Juniata,10
+51113,Virginia,Madison,10
+51750,Virginia,Radford city,10
+42073,Pennsylvania,Lawrence,9
+51031,Virginia,Campbell,9
+51171,Virginia,Shenandoah,9
+36027,New York,Dutchess,8
+42087,Pennsylvania,Mifflin,8
+42111,Pennsylvania,Somerset,8
+51163,Virginia,Rockbridge,8
+51775,Virginia,Salem city,8
+54027,West Virginia,Hampshire,8
+24011,Maryland,Caroline,7
+36105,New York,Sullivan,7
+42009,Pennsylvania,Bedford,7
+51125,Virginia,Nelson,7
+51790,Virginia,Staunton city,7
+54057,West Virginia,Mineral,7
+24023,Maryland,Garrett,6
+36079,New York,Putnam,6
+39155,Ohio,Trumbull,6
+42035,Pennsylvania,Clinton,6
+51009,Virginia,Amherst,6
+51079,Virginia,Greene,6
+51089,Virginia,Henry,6
+51760,Virginia,Richmond city,6
+54065,West Virginia,Morgan,6
+39153,Ohio,Summit,5
+42005,Pennsylvania,Armstrong,5
+42081,Pennsylvania,Lycoming,5
+51029,Virginia,Buckingham,5
+51137,Virginia,Orange,5
+51179,Virginia,Stafford,5
+51770,Virginia,Roanoke city,5
+09003,Connecticut,Hartford,4
+18069,Indiana,Huntington,4
+25013,Massachusetts,Hampden,4
+36007,New York,Broome,4
+36109,New York,Tompkins,4
+39055,Ohio,Geauga,4
+39119,Ohio,Muskingum,4
+42051,Pennsylvania,Fayette,4
+42057,Pennsylvania,Fulton,4
+42109,Pennsylvania,Snyder,4
+51023,Virginia,Botetourt,4
+51155,Virginia,Pulaski,4
+51630,Virginia,Fredericksburg city,4
+54029,West Virginia,Hancock,4
+10005,Delaware,Sussex,3
+18155,Indiana,Switzerland,3
+36029,New York,Erie,3
+36077,New York,Otsego,3
+36091,New York,Saratoga,3
+39085,Ohio,Lake,3
+42085,Pennsylvania,Mercer,3
+42119,Pennsylvania,Union,3
+42127,Pennsylvania,Wayne,3
+51011,Virginia,Appomattox,3
+51067,Virginia,Franklin,3
+51540,Virginia,Charlottesville city,3
+51600,Virginia,Fairfax city,3
+51685,Virginia,Manassas Park city,3
+09005,Connecticut,Litchfield,2
+09007,Connecticut,Middlesex,2
+24009,Maryland,Calvert,2
+24047,Maryland,Worcester,2
+25021,Massachusetts,Norfolk,2
+26125,Michigan,Oakland,2
+36025,New York,Delaware,2
+36039,New York,Greene,2
+36067,New York,Onondaga,2
+36107,New York,Tioga,2
+39019,Ohio,Carroll,2
+39051,Ohio,Fulton,2
+42023,Pennsylvania,Cameron,2
+42059,Pennsylvania,Greene,2
+42063,Pennsylvania,Indiana,2
+42113,Pennsylvania,Sullivan,2
+42131,Pennsylvania,Wyoming,2
+44007,Rhode Island,Providence,2
+51035,Virginia,Carroll,2
+51121,Virginia,Montgomery,2
+51143,Virginia,Pittsylvania,2
+51161,Virginia,Roanoke,2
+51197,Virginia,Wythe,2
+51520,Virginia,Bristol city,2
+54031,West Virginia,Hardy,2
+54069,West Virginia,Ohio,2
+09011,Connecticut,New London,1
+13027,Georgia,Brooks,1
+13089,Georgia,DeKalb,1
+13109,Georgia,Evans,1
+13117,Georgia,Forsyth,1
+17107,Illinois,Logan,1
+18003,Indiana,Allen,1
+18005,Indiana,Bartholomew,1
+18011,Indiana,Boone,1
+18033,Indiana,DeKalb,1
+18039,Indiana,Elkhart,1
+18053,Indiana,Grant,1
+18103,Indiana,Miami,1
+18113,Indiana,Noble,1
+18115,Indiana,Ohio,1
+18127,Indiana,Porter,1
+18141,Indiana,St. Joseph,1
+18169,Indiana,Wabash,1
+21015,Kentucky,Boone,1
+21041,Kentucky,Carroll,1
+21077,Kentucky,Gallatin,1
+21081,Kentucky,Grant,1
+21103,Kentucky,Henry,1
+21187,Kentucky,Owen,1
+24017,Maryland,Charles,1
+24019,Maryland,Dorchester,1
+24039,Maryland,Somerset,1
+24041,Maryland,Talbot,1
+24045,Maryland,Wicomico,1
+25005,Massachusetts,Bristol,1
+25009,Massachusetts,Essex,1
+25015,Massachusetts,Hampshire,1
+25017,Massachusetts,Middlesex,1
+25025,Massachusetts,Suffolk,1
+26115,Michigan,Monroe,1
+26163,Michigan,Wayne,1
+36001,New York,Albany,1
+36041,New York,Hamilton,1
+36055,New York,Monroe,1
+36069,New York,Ontario,1
+36093,New York,Schenectady,1
+36095,New York,Schoharie,1
+36099,New York,Seneca,1
+36115,New York,Washington,1
+37067,North Carolina,Forsyth,1
+37081,North Carolina,Guilford,1
+37157,North Carolina,Rockingham,1
+39013,Ohio,Belmont,1
+39067,Ohio,Harrison,1
+39083,Ohio,Knox,1
+39123,Ohio,Ottawa,1
+39133,Ohio,Portage,1
+39147,Ohio,Seneca,1
+39169,Ohio,Wayne,1
+42015,Pennsylvania,Bradford,1
+42033,Pennsylvania,Clearfield,1
+42065,Pennsylvania,Jefferson,1
+42083,Pennsylvania,McKean,1
+42121,Pennsylvania,Venango,1
+44003,Rhode Island,Kent,1
+44005,Rhode Island,Newport,1
+44009,Rhode Island,Washington,1
+45045,South Carolina,Greenville,1
+45073,South Carolina,Oconee,1
+47037,Tennessee,Davidson,1
+47163,Tennessee,Sullivan,1
+47189,Tennessee,Wilson,1
+51005,Virginia,Alleghany,1
+51025,Virginia,Brunswick,1
+51033,Virginia,Caroline,1
+51037,Virginia,Charlotte,1
+51041,Virginia,Chesterfield,1
+51053,Virginia,Dinwiddie,1
+51075,Virginia,Goochland,1
+51085,Virginia,Hanover,1
+51087,Virginia,Henrico,1
+51135,Virginia,Nottoway,1
+51141,Virginia,Patrick,1
+51147,Virginia,Prince Edward,1
+51173,Virginia,Smyth,1
+51177,Virginia,Spotsylvania,1
+51191,Virginia,Washington,1
+51199,Virginia,York,1
+51530,Virginia,Buena Vista city,1
+51700,Virginia,Newport News city,1
+51730,Virginia,Petersburg city,1
+53007,Washington,Chelan,1
+53011,Washington,Clark,1
+53029,Washington,Island,1
+53053,Washington,Pierce,1
+53063,Washington,Spokane,1
+54009,West Virginia,Brooke,1
+54023,West Virginia,Grant,1
+54033,West Virginia,Harrison,1
+54049,West Virginia,Marion,1
+54061,West Virginia,Monongalia,1
+54077,West Virginia,Preston,1
+54091,West Virginia,Taylor,1
+54107,West Virginia,Wood,1
+55021,Wisconsin,Columbia,1
+55025,Wisconsin,Dane,1
