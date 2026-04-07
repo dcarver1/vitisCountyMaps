@@ -35,6 +35,18 @@ observation_data <- read_csv(
   show_col_types = FALSE
 ) |>
   dplyr::filter(!is.na(taxon))
+# need to embed the data for the rotundifolia variatels back into the data set
+rotund_var <- originalVitis |>
+  dplyr::filter(
+    taxon %in%
+      c(
+        "Vitis rotundifolia var. munsoniana",
+        "Vitis rotundifolia var. pygmaea",
+        "Vitis rotundifolia var. rotundifolia"
+      )
+  )
+# bind to observations data
+observation_data <- dplyr::bind_rows(observation_data, rotund_var)
 
 
 county_shp <- sf::st_read(config$paths$county_shp, quiet = TRUE)
@@ -94,12 +106,12 @@ generate_occurrence_rmd <- function(species_name) {
 }
 
 # 5. Execute
-# purrr::walk(full_species, generate_occurrence_rmd) # Uncomment to run full batch
+purrr::walk(full_species, generate_occurrence_rmd) # Uncomment to run full batch
 #issues with "Vitis rotundifolia var. munsoniana" == zero records -- pretty sure it was merged into the a difference taxonomy
 # Vitis rotundifolia var. rotundifolia , Vitis rotundifolia var. pygmaea
 # Vitis girdiana (fna1 not found)
-for (species in full_species[18:20]) {
-  print(species)
-  generate_occurrence_rmd(species)
-}
-generate_occurrence_rmd(species_name = "Vitis girdiana") # Test single run
+# for (species in full_species[18:20]) {
+#   print(species)
+#   generate_occurrence_rmd(species)
+# }
+# generate_occurrence_rmd(species_name = "Vitis girdiana") # Test single run
