@@ -1,31 +1,45 @@
 # renderCountySummaries.R
 # Main execution script for generating Vitis county evaluation maps
 
-pacman::p_load(dplyr, readr, sf, terra, htmltools, googledrive, googlesheets4, purrr, rmarkdown,stringr)
+pacman::p_load(
+  dplyr,
+  readr,
+  sf,
+  terra,
+  htmltools,
+  googledrive,
+  googlesheets4,
+  purrr,
+  rmarkdown,
+  stringr
+)
 
 # 1. Load configuration and helper functions
 source("scripts/config.R") # Load configuration settings
-# source functions 
+# source functions
 list.files("R", full.names = TRUE) |> purrr::walk(source)
 
 
 # 2. Read base datasets
-named_features    <- read_csv(config$paths$named_features, show_col_types = FALSE)
-plants_data1      <- read_csv(config$paths$plants_data, show_col_types = FALSE)
-bonap_data        <- read_csv(config$paths$bonap_data, show_col_types = FALSE)
+named_features <- read_csv(config$paths$named_features, show_col_types = FALSE)
+plants_data1 <- read_csv(config$paths$plants_data, show_col_types = FALSE)
+bonap_data <- read_csv(config$paths$bonap_data, show_col_types = FALSE)
 nature_serve_data <- read_csv(config$paths$nature_serve, show_col_types = FALSE)
-fna_data          <- read_csv(config$paths$fna_data, show_col_types = FALSE)
-ns_ref_data       <- read_csv(config$paths$ns_ref_data, show_col_types = FALSE)
+fna_data <- read_csv(config$paths$fna_data, show_col_types = FALSE)
+ns_ref_data <- read_csv(config$paths$ns_ref_data, show_col_types = FALSE)
 synData <- read_csv(config$paths$syn_vitis, show_col_types = FALSE)
 originalVitis <- read_csv(config$paths$orig_vitis, show_col_types = FALSE)
 
-observation_data  <- read_csv(config$paths$observation_data, show_col_types = FALSE) |>
+observation_data <- read_csv(
+  config$paths$observation_data,
+  show_col_types = FALSE
+) |>
   dplyr::filter(!is.na(taxon))
 
 
 county_shp <- sf::st_read(config$paths$county_shp, quiet = TRUE)
 county_shp <- sf::st_read(config$paths$county_shp, quiet = TRUE)
-state_shp  <- sf::st_read(config$paths$state_shp, quiet = TRUE)
+state_shp <- sf::st_read(config$paths$state_shp, quiet = TRUE)
 
 # 3. Process dynamic data using helper functions
 full_species <- get_target_species(config$paths$taxonomy)
@@ -35,33 +49,38 @@ reviewed_points <- reviewed_lists$points
 reviewed_county <- reviewed_lists$county
 
 # Generate and save the merged BONAP/Plants CSV
-pb_combined <- process_plants_bonap(bonap_data, plants_data1, named_features, config$paths$pb_output)
+pb_combined <- process_plants_bonap(
+  bonap_data,
+  plants_data1,
+  named_features,
+  config$paths$pb_output
+)
 
 # 4. Define the rendering function
 # inside renderCountySummaries.R
 
 generate_occurrence_rmd <- function(species_name) {
   message(paste("Processing and Rendering map for:", species_name))
-  
+
   # 1. Run the geoprocessing to get perfectly clean data
   prepped_data <- prep_species_data(
-    speciesName     = species_name,
-    namedFeatures   = named_features,
-    plantsData1     = plants_data1,
-    bonapData       = bonap_data,
+    speciesName = species_name,
+    namedFeatures = named_features,
+    plantsData1 = plants_data1,
+    bonapData = bonap_data,
     natureSeverData = nature_serve_data,
     observationData = observation_data,
     synData = synData,
     origData = originalVitis,
-    fnaData         = fna_data,
-    countySHP       = county_shp,
-    stateSHP        = state_shp,
-    reviewedPoints  = reviewed_points,
-    reviewedCounty  = reviewed_county,
-    nsRefData       = ns_ref_data,
-    export_dir      = "output/countyMapTables"
+    fnaData = fna_data,
+    countySHP = county_shp,
+    stateSHP = state_shp,
+    reviewedPoints = reviewed_points,
+    reviewedCounty = reviewed_county,
+    nsRefData = ns_ref_data,
+    export_dir = "output/countyMapTables"
   )
-  
+
   # 2. Render the template using ONLY the prepped data
   rmarkdown::render(
     input = config$paths$rmd_template,
@@ -75,11 +94,11 @@ generate_occurrence_rmd <- function(species_name) {
 }
 
 # 5. Execute
-purrr::walk(full_species, generate_occurrence_rmd) # Uncomment to run full batch
-#issues with "Vitis rotundifolia var. munsoniana" == zero records -- pretty sure it was merged into the a difference taxonomy 
+# purrr::walk(full_species, generate_occurrence_rmd) # Uncomment to run full batch
+#issues with "Vitis rotundifolia var. munsoniana" == zero records -- pretty sure it was merged into the a difference taxonomy
 # Vitis rotundifolia var. rotundifolia , Vitis rotundifolia var. pygmaea
 # Vitis girdiana (fna1 not found)
-for(species in full_species[21:28]) {
+for (species in full_species[18:20]) {
   print(species)
   generate_occurrence_rmd(species)
 }

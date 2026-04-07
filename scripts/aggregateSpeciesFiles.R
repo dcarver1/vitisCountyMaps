@@ -82,3 +82,14 @@ write_csv(
   output,
   file = "~/trueNAS/work/vitisCountyMaps/output/countyCountsSummaryTable.csv"
 )
+
+
+# read in all the countyMapTables files, extract the species name, and summarize the number of counties with records for
+df <- tibble()
+for (i in 1:length(files)) {
+  d1 <- read_csv(files[i], show_col_types = FALSE)
+  taxa_name <- tools::file_path_sans_ext(basename(files[i]))
+  # bind results to the df
+  d1$taxon <- taxa_name
+  df <- bind_rows(df, d1)
+}

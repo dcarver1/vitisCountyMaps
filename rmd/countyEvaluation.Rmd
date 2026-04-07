@@ -20,23 +20,15 @@ params:
 # Load only the packages required for visualization and presentation
 pacman::p_load("leaflet", "dplyr", "DT", "sf", "htmltools")
 
-if(FALSE){
-  # Unpack the pre-processed data bundle
-meta   <- params$data$meta
-layers <- params$data$map_layers
-tables <- params$data$tables
-}else{
-  #testing 
-meta   <- data$meta
-layers <- data$map_layers
-tables <- data$tables
+render_data <- params$data
+
+if (is.atomic(render_data) && length(render_data) == 1 && is.na(render_data)) {
+  stop("`params$data` was not supplied to countyEvaluation.Rmd.")
 }
 
-
-
-
-
-
+meta   <- render_data$meta
+layers <- render_data$map_layers
+tables <- render_data$tables
 ```
 
 <img src="logobanner.png" alt="Supporting Organizations" style="width: 100%">
@@ -146,9 +138,14 @@ if(nrow(layers$points) == 0){
   # Point layer popups
   layers$points <- layers$points |>
     dplyr::mutate(
-      link = paste0("[https://docs.google.com/forms/d/e/1FAIpQLScCTcg6ITFMXs9QpQEAvN92GI06wtSTiGSTcUBrOK6E2kChjw/viewform?usp=pp_url&entry.1016353547=](https://docs.google.com/forms/d/e/1FAIpQLScCTcg6ITFMXs9QpQEAvN92GI06wtSTiGSTcUBrOK6E2kChjw/viewform?usp=pp_url&entry.1016353547=)",
-                    taxon, "&entry.764274277=", countyFIPS, "&entry.763749150=", state,
-                    "&entry.1585476570=", county, "&entry.1304312867=", recordID),
+      link = paste0(
+        "https://docs.google.com/forms/d/e/1FAIpQLScCTcg6ITFMXs9QpQEAvN92GI06wtSTiGSTcUBrOK6E2kChjw/viewform?usp=pp_url&entry.1016353547=",
+        utils::URLencode(taxon, reserved = TRUE),
+        "&entry.764274277=", utils::URLencode(countyFIPS, reserved = TRUE),
+        "&entry.763749150=", utils::URLencode(state, reserved = TRUE),
+        "&entry.1585476570=", utils::URLencode(county, reserved = TRUE),
+        "&entry.1304312867=", utils::URLencode(recordID, reserved = TRUE)
+      ),
       url_formatted = dplyr::case_when(
         grepl("http", x = sourceUniqueID) ~ paste0("<a target='_blank' href=\"", sourceUniqueID, "\">view</a>"),
         grepl("http", x = collectionSource) ~ paste0("<a target='_blank' href=\"", collectionSource, "\">view</a>"),
