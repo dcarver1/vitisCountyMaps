@@ -106,12 +106,13 @@ generate_occurrence_rmd <- function(species_name) {
 }
 
 # 5. Execute
-purrr::walk(full_species, generate_occurrence_rmd) # Uncomment to run full batch
+# purrr::walk(full_species, generate_occurrence_rmd) # Uncomment to run full batch
 #issues with "Vitis rotundifolia var. munsoniana" == zero records -- pretty sure it was merged into the a difference taxonomy
 # Vitis rotundifolia var. rotundifolia , Vitis rotundifolia var. pygmaea
-# Vitis girdiana (fna1 not found)
-# for (species in full_species[18:20]) {
-#   print(species)
-#   generate_occurrence_rmd(species)
-# }
-# generate_occurrence_rmd(species_name = "Vitis girdiana") # Test single run
+# Vitis girdiana (fna1 not foun:d)
+for (species in full_species[19:28]) {
+  print(species)
+  generate_occurrence_rmd(species)
+}
+generate_occurrence_rmd(species_name = "Vitis girdiana") # Test single run
+

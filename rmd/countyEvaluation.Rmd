@@ -18,7 +18,7 @@ params:
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
 # Load only the packages required for visualization and presentation
-pacman::p_load("leaflet", "dplyr", "DT", "sf", "htmltools")
+pacman::p_load("leaflet", "dplyr", "DT", "sf", "htmltools", "rmapshaper")
 
 render_data <- params$data
 
@@ -29,6 +29,23 @@ if (is.atomic(render_data) && length(render_data) == 1 && is.na(render_data)) {
 meta   <- render_data$meta
 layers <- render_data$map_layers
 tables <- render_data$tables
+
+
+
+layers$countyClass <- rmapshaper::ms_simplify(layers$countyClass, keep = 0.05, keep_shapes = TRUE)
+
+# If your other layers are also polygons (not just filtered versions of countyClass), 
+# you should simplify them as well to prevent overlapping high-res/low-res boundaries.
+if(nrow(layers$bpData) > 0) {
+  layers$bpData <- rmapshaper::ms_simplify(layers$bpData, keep = 0.05, keep_shapes = TRUE)
+}
+if(nrow(layers$hgData) > 0) {
+  layers$hgData <- rmapshaper::ms_simplify(layers$hgData, keep = 0.05, keep_shapes = TRUE)
+}
+if(nrow(layers$oData) > 0) {
+  layers$oData <- rmapshaper::ms_simplify(layers$oData, keep = 0.05, keep_shapes = TRUE)
+}
+
 ```
 
 <img src="logobanner.png" alt="Supporting Organizations" style="width: 100%">
@@ -127,6 +144,28 @@ If state level distribution information was provided for a given specific specie
 
 ```{r produceMAP, echo=FALSE, message=FALSE, warning=FALSE}
 
+# ---------------------------------------------------------
+# ---------------------------------------------------------
+  # NEW: READ AND JOIN SPOTTED LANTERNFLY DATA
+  # ---------------------------------------------------------
+  # Assuming the CSV is in the same directory as the Rmd file
+  slf_data <- read.csv("~/trueNAS/work/vitisCountyMaps/data/processed/slf/output_county_observations_fips.csv", colClasses = c(FIPS = "character"))
+  
+  # Ensure FIPS codes are 5 characters long (pads leading zeros for states like CT)
+  slf_data$FIPS <- stringr::str_pad(slf_data$FIPS, width = 5, pad = "0")
+  
+  # Join the observations to the existing county spatial data
+  layers$countyClass <- layers$countyClass |>
+    dplyr::left_join(slf_data, by = c("GEOID" = "FIPS")) |>
+    dplyr::mutate(
+      slf_popup = paste0(
+        "<b>County Name: </b>", NAME,
+        "<br/><b>State: </b>", STUSPS,
+        "<br/><b>Spotted Lanternfly Observations: </b>", Total_Observations
+      )
+    )
+    
+
 if(nrow(layers$points) == 0){
   print("There is no spatial data for this species and no map can be produced.")
 } else {
@@ -205,10 +244,11 @@ if(nrow(layers$points) == 0){
   # Base Map Setup
   rr <- tags$div(HTML(paste0("<h3>", meta$speciesName , "</h3>")))  
 
-  m1 <- leaflet(width = "100%", height = 800, options = leafletOptions(minZoom = 3)) |>
+m1 <- leaflet(width = "100%", height = 800, options = leafletOptions(minZoom = 3)) |>
     addProviderTiles(providers$Esri.WorldGrayCanvas) |>
     addMapPane("anyRecord", zIndex = 414) |>
     addMapPane("sumOfRecords", zIndex = 415) |>
+    addMapPane("lanternfly", zIndex = 416) |> # NEW PANE ADDED HERE
     addMapPane("bpData", zIndex = 418) |>
     addMapPane("hgData", zIndex = 419) |>
     addMapPane("points", zIndex = 420) |>
@@ -220,6 +260,12 @@ if(nrow(layers$points) == 0){
                 color = "white", fillColor = ~singleColor, popup = ~popup,
                 weight = 0.8, fillOpacity = 0.6, opacity = 0.8,
                 group = "Counties with a record", options = pathOptions(pane = "anyRecord")) |>
+    addPolygons(data = layers$countyClass,
+                fillColor = "#ffffcc", # Single light yellow color
+                color = "black", weight = 1, fillOpacity = 0.7, opacity = 1, 
+                popup = ~slf_popup,
+                group = "spotted lanternfly occurrences", 
+                options = pathOptions(pane = "lanternfly")) |>
     addPolygons(data = layers$countyClass,
                 color = "white", fillColor = ~allColor, popup = ~popup,
                 weight = 0.8, fillOpacity = 1, opacity = 0.8,
@@ -263,6 +309,10 @@ if(nrow(layers$points) == 0){
     addLegend(color = "#c51b8a", group = "Herbarium Occurrences with web url", labels = "Herbarium Occurrences with web url") |>
     addLegend(color = "#fa9fb5", group = "Herbarium Occurrences without web url", labels = "Herbarium Occurrences without web url") |>
     addLegend(color = "#fc8d62", group = "iNaturalist observation data", labels = "iNaturalist observation data") |>
+   addLegend(color = "#ffffcc", 
+              labels = "Spotted Lanternfly Observations", 
+              group = "spotted lanternfly occurrences") |>
+              
     addLayersControl(
       overlayGroups = c("Counties with a record", "Sum of records within County", 
                         "Counties listed in USDA Plants and/or Bonap Only (No occurrence points)",
@@ -270,13 +320,15 @@ if(nrow(layers$points) == 0){
                         "Counties with iNaturalist Observation only", "counties changed during review",
                         "Germplasm Occurrences", "Herbarium Occurrences with web url",
                         "Herbarium Occurrences without web url", "iNaturalist observation data",
-                        "Locations changed during review"),
+                        "Locations changed during review",
+                        "spotted lanternfly occurrences"), 
       options = layersControlOptions(collapsed = FALSE)
     ) |>
     hideGroup(c("Sum of records within County", "Counties listed in USDA Plants and/or Bonap Only (No occurrence points)",
                 "Counties with one or more Herbarium or Germplasm Occurrence", "Counties with iNaturalist Observation only", 
                 "Herbarium Occurrences with web url", "Herbarium Occurrences without web url",
-                "iNaturalist observation data", "Germplasm Occurrences"))
+                "iNaturalist observation data", "Germplasm Occurrences",
+                "spotted lanternfly occurrences"))
 
   # Add Reviewed Data if it exists
   if(nrow(layers$rCounty) > 0){
