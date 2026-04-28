@@ -260,9 +260,9 @@ m1 <- leaflet(width = "100%", height = 800, options = leafletOptions(minZoom = 3
                 color = "white", fillColor = ~singleColor, popup = ~popup,
                 weight = 0.8, fillOpacity = 0.6, opacity = 0.8,
                 group = "Counties with a record", options = pathOptions(pane = "anyRecord")) |>
-    addPolygons(data = layers$countyClass,
+    addPolygons(data = layers$countyClass |> dplyr::filter(Total_Observations >= 1),
                 fillColor = "#ffffcc", # Single light yellow color
-                color = "black", weight = 1, fillOpacity = 0.7, opacity = 1, 
+                color = "black", weight = 1, fillOpacity = 0.3, opacity = 1, 
                 popup = ~slf_popup,
                 group = "spotted lanternfly occurrences", 
                 options = pathOptions(pane = "lanternfly")) |>

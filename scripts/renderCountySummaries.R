@@ -110,9 +110,9 @@ generate_occurrence_rmd <- function(species_name) {
 #issues with "Vitis rotundifolia var. munsoniana" == zero records -- pretty sure it was merged into the a difference taxonomy
 # Vitis rotundifolia var. rotundifolia , Vitis rotundifolia var. pygmaea
 # Vitis girdiana (fna1 not foun:d)
-for (species in full_species[19:28]) {
+for (species in full_species[1:28]) {
   print(species)
   generate_occurrence_rmd(species)
 }
-generate_occurrence_rmd(species_name = "Vitis girdiana") # Test single run
+# generate_occurrence_rmd(species_name = "Vitis girdiana") # Test single run
 
